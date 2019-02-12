@@ -30,7 +30,7 @@
 
 using namespace std;
 
-#define NUM_OF_LAYERS 3 
+#define NUM_OF_LAYERS 3     # TODO: update this, should not explicitly specify it
 // #define DEBUG
 // #define DEBUG_2
 // #define DEBUG_3
