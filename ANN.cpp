@@ -30,7 +30,6 @@
 
 using namespace std;
 
-#define NUM_OF_LAYERS 3     # TODO: update this, should not explicitly specify it
 // #define DEBUG
 // #define DEBUG_2
 // #define DEBUG_3
@@ -40,13 +39,14 @@ namespace function {
 
 
 class ANN : public Function {
-  vector<int> num_of_nodes = vector<int>(NUM_OF_LAYERS);
-  vector<string> layer_types = vector<string>(NUM_OF_LAYERS - 1);
+  int num_layers;
+  vector<int> num_of_nodes;
+  vector<string> layer_types;
   vector<vector<double> > coefficients_of_connections;
   vector<vector<double> > values_of_biased_nodes;
-  vector<vector<double> > output_of_each_layer = vector<vector<double> >(NUM_OF_LAYERS);
-  vector<vector<double> > input_of_each_layer = vector<vector<double> >(NUM_OF_LAYERS);
-  vector<double** > coeff = vector<double** >(NUM_OF_LAYERS - 1);  // each coeff of connection is a matrix
+  vector<vector<double> > output_of_each_layer;
+  vector<vector<double> > input_of_each_layer;
+  vector<double** > coeff;  // each coeff of connection is a matrix
 
 public:
   static void registerKeywords( Keywords& keys );
@@ -61,6 +61,7 @@ PLUMED_REGISTER_ACTION(ANN,"ANN")
 void ANN::registerKeywords( Keywords& keys ) {
   Function::registerKeywords(keys);
   keys.use("ARG"); keys.use("PERIODIC");
+  keys.add("compulsory", "NUM_LAYERS", "3");   // why default value for a compulsory argument?
   keys.add("compulsory", "NUM_OF_NODES", "");
   keys.add("compulsory", "LAYER_TYPES", "");
   keys.add("numbered", "COEFFICIENTS_OF_CONNECTIONS", "");
@@ -71,6 +72,12 @@ ANN::ANN(const ActionOptions&ao):
   Action(ao),
   Function(ao)
 {
+  parse("NUM_LAYERS", num_layers);
+  num_of_nodes = vector<int>(num_layers);
+  layer_types = vector<string>(num_layers - 1);
+  output_of_each_layer = vector<vector<double> >(num_layers);
+  input_of_each_layer = vector<vector<double> >(num_layers);
+  coeff = vector<double** >(num_layers - 1);
   parseVector("NUM_OF_NODES", num_of_nodes);
   parseVector("LAYER_TYPES", layer_types);
   log.printf("layer_types = %s, %s\n", layer_types[0].c_str(), layer_types[1].c_str());
@@ -99,7 +106,7 @@ ANN::ANN(const ActionOptions&ao):
   }
 
   auto temp_coeff = coefficients_of_connections; 
-  for (int ii = 0; ii < NUM_OF_LAYERS - 1; ii ++) {
+  for (int ii = 0; ii < num_layers - 1; ii ++) {
       int num_of_rows, num_of_cols; // num of rows/cols for the coeff matrix of this connection
       num_of_rows = num_of_nodes[ii + 1];
       num_of_cols = num_of_nodes[ii];
@@ -115,7 +122,7 @@ ANN::ANN(const ActionOptions&ao):
       }
   }
   // check coeff
-  for (int ii = 0; ii < NUM_OF_LAYERS - 1; ii ++) {
+  for (int ii = 0; ii < num_layers - 1; ii ++) {
     log.printf("coeff %d = \n", ii);
     for (int jj = 0; jj < num_of_nodes[ii + 1]; jj ++) {
       for (int kk = 0; kk < num_of_nodes[ii]; kk ++) {
@@ -125,7 +132,7 @@ ANN::ANN(const ActionOptions&ao):
     }
   }
   // check bias
-  for (int ii = 0; ii < NUM_OF_LAYERS - 1; ii ++) {
+  for (int ii = 0; ii < num_layers - 1; ii ++) {
     log.printf("bias %d = \n", ii);
     for (int jj = 0; jj < num_of_nodes[ii + 1]; jj ++) {
       log.printf("%f ", values_of_biased_nodes[ii][jj]);
@@ -134,7 +141,7 @@ ANN::ANN(const ActionOptions&ao):
   } 
   log.printf("initialization ended\n");
   // create components
-  for (int ii = 0; ii < num_of_nodes[NUM_OF_LAYERS - 1]; ii ++) {
+  for (int ii = 0; ii < num_of_nodes[num_layers - 1]; ii ++) {
     string name_of_this_component = to_string(ii);
     addComponentWithDerivatives(name_of_this_component);  
     componentIsNotPeriodic(name_of_this_component);  
@@ -185,8 +192,8 @@ void ANN::calculate_output_of_each_layer(const vector<double>& input) {
 #ifdef DEBUG_2
     // print out the result for debugging
     printf("output_of_each_layer = \n");
-    // for (int ii = NUM_OF_LAYERS - 1; ii < NUM_OF_LAYERS; ii ++) {
-    for (int ii = 0; ii < NUM_OF_LAYERS; ii ++) {
+    // for (int ii = num_layers - 1; ii < num_layers; ii ++) {
+    for (int ii = 0; ii < num_layers; ii ++) {
         printf("layer[%d]: ", ii);
         if (ii != 0) {
             cout << layer_types[ii - 1] << "\t";    
@@ -283,7 +290,7 @@ void ANN::back_prop(vector<vector<double> >& derivatives_of_each_layer, int inde
 #ifdef DEBUG
     // print out the result for debugging
     printf("derivatives_of_each_layer = \n");
-    for (int ii = 0; ii < NUM_OF_LAYERS; ii ++) {
+    for (int ii = 0; ii < num_layers; ii ++) {
         printf("layer[%d]: ", ii);
         for (int jj = 0; jj < num_of_nodes[ii]; jj ++) {
             printf("%lf\t", derivatives_of_each_layer[ii][jj]);
@@ -305,11 +312,11 @@ void ANN::calculate() {
   calculate_output_of_each_layer(input_layer_data);
   vector<vector<double> > derivatives_of_each_layer;
   
-  for (int ii = 0; ii < num_of_nodes[NUM_OF_LAYERS - 1]; ii ++) {
+  for (int ii = 0; ii < num_of_nodes[num_layers - 1]; ii ++) {
     back_prop(derivatives_of_each_layer, ii);
     string name_of_this_component = to_string(ii);
     Value* value_new=getPntrToComponent(name_of_this_component);
-    value_new -> set(output_of_each_layer[NUM_OF_LAYERS - 1][ii]);
+    value_new -> set(output_of_each_layer[num_layers - 1][ii]);
     for (int jj = 0; jj < num_of_nodes[0]; jj ++) {
       value_new -> setDerivative(jj, derivatives_of_each_layer[0][jj]);  // TODO: setDerivative or addDerivative?
     }
