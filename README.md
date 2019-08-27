@@ -78,3 +78,6 @@ Plumed_helper.get_ANN_expression('ANN', node_num=[2, 3, 1],
                                  activation_list=['Tanh', 'Tanh'])
 ```
 
+## Contact
+
+For any questions, feel free to contact weichen9@illinois.edu or open a github issue.
