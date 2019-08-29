@@ -14,8 +14,8 @@
    You should have received a copy of the GNU Lesser General Public License
    along with plumed.  If not, see <http://www.gnu.org/licenses/>.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-#include "Function.h"
-#include "ActionRegister.h"
+#include "../function/Function.h"
+#include "../function/ActionRegister.h"
 #include "cassert"
 
 #include <string>
@@ -33,7 +33,7 @@ namespace PLMD {
 namespace function {
 namespace annfunc {
 
-//+PLUMEDOC ANN_Function ANN
+//+PLUMEDOC Function ANN
 
 /*
 This module implements ANN class, which is a subclass of Function class. 
@@ -81,6 +81,13 @@ void ANN::registerKeywords( Keywords& keys ) {
   	"WEIGHTS1 represents flattened weight array connecting layer 1 and layer 2, ...");
   keys.add("numbered", "BIASES", "bias array for each layer of the neural network, "
   	"BIASES0 represents bias array for layer 1, BIASES1 represents bias array for layer 2, ...");
+  // since v2.2 plumed requires all components be registered
+  for (int ii = 0; ii < 10; ii++)  // TODO: modify this later
+  {
+    string name_of_this_component = to_string(ii);
+    keys.addOutputComponent(name_of_this_component, "default", "");
+  }
+  
 }
 
 ANN::ANN(const ActionOptions&ao):
