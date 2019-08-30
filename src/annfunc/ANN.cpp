@@ -44,6 +44,36 @@ or inputs for data analysis tools.
 
 \par Examples
 
+Assume we have an ANN with numbers of nodes being [2, 3, 1], and weights connecting layer 0 and 1 are
+
+[[1,2], [3,4], [5,6]]
+
+weights connecting layer 1 and 2 are
+
+[[7,8,9]]
+
+Bias for layer 1 and 2 are [10, 11, 12] and [13], respectively.
+
+All activation functions are Tanh.
+
+Then if input variables are l_0_out_0, l_0_out_1, the corresponding ANN function object can be defined using 
+following plumed script:
+
+\plumedfile
+ANN ...
+LABEL=ann
+ARG=l_0_out_0,l_0_out_1
+NUM_LAYERS=3
+NUM_NODES=2,3,1
+ACTIVATIONS=Tanh,Tanh
+WEIGHTS0=1,2,3,4,5,6
+WEIGHTS1=7,8,9
+BIASES0=10,11,12
+BIASES1=13
+... ANN
+\endplumedfile
+
+To access its components, we use "ann.node-0", "ann.node-1", ..., which represents 0th, 1st,..., component of neural network outputs.
 
 
 */
