@@ -118,15 +118,15 @@ ANN::ANN(const ActionOptions&ao):
       break;
     }
     weights.push_back(temp_single_coeff);
-    log.printf("size of temp_single_coeff = %d\n", temp_single_coeff.size());
-    log.printf("size of weights = %d\n", weights.size());
+    log.printf("size of temp_single_coeff = %u\n", temp_single_coeff.size());
+    log.printf("size of weights = %u\n", weights.size());
     // parse bias
     if( !parseNumberedVector("BIASES", ii, temp_single_bias) ) {
       temp_single_bias=biases[ii-1];
     }
     biases.push_back(temp_single_bias);
-    log.printf("size of temp_single_bias = %d\n", temp_single_bias.size());
-    log.printf("size of biases = %d\n", biases.size());
+    log.printf("size of temp_single_bias = %u\n", temp_single_bias.size());
+    log.printf("size of biases = %u\n", biases.size());
   }
 
   if(getNumberOfArguments() != num_nodes[0]) {
@@ -288,7 +288,7 @@ void ANN::back_prop(vector<vector<double> >& derivatives_of_each_layer, int inde
 #endif
                 }
             } 
-            // FIXME: some problem here      
+            // TODO: should be fine, pass all tests, although there seems to be some problems here previously  
         }
         else {
             for (int mm = 0; mm < num_nodes[jj]; mm ++) {
