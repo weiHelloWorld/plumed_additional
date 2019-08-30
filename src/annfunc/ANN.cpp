@@ -82,12 +82,7 @@ void ANN::registerKeywords( Keywords& keys ) {
   keys.add("numbered", "BIASES", "bias array for each layer of the neural network, "
   	"BIASES0 represents bias array for layer 1, BIASES1 represents bias array for layer 2, ...");
   // since v2.2 plumed requires all components be registered
-  for (int ii = 0; ii < 10; ii++)  // TODO: modify this later
-  {
-    string name_of_this_component = to_string(ii);
-    keys.addOutputComponent(name_of_this_component, "default", "");
-  }
-  
+  keys.addOutputComponent("node", "default", "components of ANN outputs");
 }
 
 ANN::ANN(const ActionOptions&ao):
@@ -169,7 +164,7 @@ ANN::ANN(const ActionOptions&ao):
   log.printf("initialization ended\n");
   // create components
   for (int ii = 0; ii < num_nodes[num_layers - 1]; ii ++) {
-    string name_of_this_component = to_string(ii);
+    string name_of_this_component = "node-" + to_string(ii);
     addComponentWithDerivatives(name_of_this_component);  
     componentIsNotPeriodic(name_of_this_component);  
   }
@@ -341,7 +336,7 @@ void ANN::calculate() {
   
   for (int ii = 0; ii < num_nodes[num_layers - 1]; ii ++) {
     back_prop(derivatives_of_each_layer, ii);
-    string name_of_this_component = to_string(ii);
+    string name_of_this_component = "node-" + to_string(ii);
     Value* value_new=getPntrToComponent(name_of_this_component);
     value_new -> set(output_of_each_layer[num_layers - 1][ii]);
     for (int jj = 0; jj < num_nodes[0]; jj ++) {
