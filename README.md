@@ -1,7 +1,7 @@
 ANN (Artificial Neural Network) function for plumed
 ====================
 
-This is the repository for plumed function.  It implements `ANN` class, which is a subclass of `Function` class.  `ANN` class takes multi-dimensional arrays as inputs for a fully-connected feedforward neural network with specified neural network weights and generates corresponding outputs.  The `ANN` outputs can be used as collective variables, inputs for other collective variables, or inputs for data analysis tools.  
+This is the repository for plumed ANN function (annfunc) module.  It implements `ANN` class, which is a subclass of `Function` class.  `ANN` class takes multi-dimensional arrays as inputs for a fully-connected feedforward neural network with specified neural network weights and generates corresponding outputs.  The `ANN` outputs can be used as collective variables, inputs for other collective variables, or inputs for data analysis tools.  
 
 ## Dependency
 
@@ -9,7 +9,7 @@ This is the repository for plumed function.  It implements `ANN` class, which is
 
 ## Installation
 
-Place file `ANN.cpp` under `src/function` directory of plumed, then proceed to install plumed.  `ANN` class will be built as part of building process of plumed package.
+TODO: currently we are working on a pull request for plumed.  Once it is merged, you may directly install this module from there.
 
 ## Usage
 
@@ -19,15 +19,15 @@ It is used in a similar way to [other plumed functions](https://www.plumed.org/d
 
 - `NUM_LAYERS` (int): number of layers for the neural network
 
-- `NUM_OF_NODES` (int array): number of nodes in all layers of the neural network
+- `NUM_NODES` (int array): number of nodes in all layers of the neural network
 
-- `LAYER_TYPES` (string array): types of activation functions of layers, currently we have implemented "Linear", "Tanh", "Circular" layers, it should be straightforward to add other types as well
+- `ACTIVATIONS` (string array): types of activation functions of layers, currently we have implemented "Linear", "Tanh", "Circular" layers, it should be straightforward to add other types as well
 
-- `COEFFICIENTS_OF_CONNECTIONS` (numbered keyword, double array): this is a numbered keyword, `COEFFICIENTS_OF_CONNECTIONS${i}` is the **flattened** array of the weights connecting nodes in layer `i` and layer `(i+1)`.  An example is given in the next section.
+- `WEIGHTS` (numbered keyword, double array): this is a numbered keyword, `WEIGHTS0` represents flattened weight array connecting layer 0 and layer 1, `WEIGHTS1` represents flattened weight array connecting layer 1 and layer 2, ...  An example is given in the next section.
 
-- `VALUES_OF_BIASED_NODES` (numbered keyword, double array): this is a numbered keyword, `VALUES_OF_BIASED_NODES${i}` is the array of the bias for nodes in layer `(i+1)`.
+- `BIASES` (numbered keyword, double array): this is a numbered keyword, BIASES0 represents bias array for layer 1, BIASES1 represents bias array for layer 2, ...
 
-Assuming we have an `ANN` function object named `ann`, we use `ann.0, ann.1, ...` to access component 0, 1, ... of its outputs (used as collective variables, inputs for other collective variables, or data analysis tools).
+Assuming we have an `ANN` function object named `ann`, we use `ann.node-0, ann.node-1, ...` to access component 0, 1, ... of its outputs (used as collective variables, inputs for other collective variables, or data analysis tools).
 
 ## Examples
 
@@ -64,7 +64,7 @@ All activation functions are `Tanh`.
 Then if input variables are `l_0_out_0, l_0_out_1`, the corresponding `ANN` function object can be defined using following plumed script: 
 
 ```
-ann: ANN ARG=l_0_out_0,l_0_out_1 NUM_LAYERS=3 NUM_OF_NODES=2,3,1 LAYER_TYPES=Tanh,Tanh  COEFFICIENTS_OF_CONNECTIONS0=1,2,3,4,5,6 COEFFICIENTS_OF_CONNECTIONS1=7,8,9  VALUES_OF_BIASED_NODES0=10,11,12 VALUES_OF_BIASED_NODES1=13
+ann: ANN ARG=l_0_out_0,l_0_out_1 NUM_LAYERS=3 NUM_NODES=2,3,1 ACTIVATIONS=Tanh,Tanh  WEIGHTS0=1,2,3,4,5,6 WEIGHTS1=7,8,9  BIASES0=10,11,12 BIASES1=13
 ```
 
 This plumed script can be generated with function `Plumed_helper.get_ANN_expression()` in [this](https://github.com/weiHelloWorld/plumed_helper/blob/master/plumed_helper.py) repository.  Following is the Python code using this function to generate the script above:
